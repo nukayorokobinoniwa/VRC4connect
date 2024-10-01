@@ -22,10 +22,16 @@ public class Reset : UdonSharpBehaviour
     [SerializeField] TextMeshProUGUI number;
     [SerializeField] TextMeshProUGUI winner;
     
-    
+    [UdonSynced] private bool resetFlag;
 
-    
-    public override void Interact(){
+    public override void Interact()
+    {
+        resetFlag = true; // リセットフラグを立てる
+        RequestSerialization(); // 状態を同期
+        PerformReset();
+    }
+
+    public void PerformReset(){
         checkwin.Init();
         pushcounter.Init();
         popblock1.Init();
@@ -40,6 +46,15 @@ public class Reset : UdonSharpBehaviour
         turn.text = "現在は\n青の番です。";
         number.text = "現在0個の\nブロックが\n置かれている。";
         winner.text = "勝敗";
+    }
+
+    public override void OnDeserialization()
+    {
+        if (resetFlag)
+        {
+            PerformReset(); // 他プレイヤーがリセットを行った場合もリセットを実行
+            resetFlag = false; // リセットフラグを解除
+        }
     }
 
 }
